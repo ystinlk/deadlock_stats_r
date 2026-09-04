@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link'
 
 export interface Hero {
   id: number;
@@ -81,7 +82,7 @@ return (
                                 alt={hero.name} 
                                 className="w-12 h-12 rounded-lg object-cover bg-neutral-800/50"
                             />
-                            <span className="font-medium text-white">{hero.name}</span>
+                            <span className="font-medium text-white"><Link href={`/heroes/${hero.id}`}>{hero.name}</Link></span>
                         </div>
                     </td>
                     <td className="p-3 font-mono">

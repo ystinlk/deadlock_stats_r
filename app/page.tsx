@@ -13,8 +13,8 @@ export default async function Home() {
   );
 
 const heroesForTable = heroesAssets
+// Превращаем каждого героя в объект под интерфейс Hero
   .filter((hero) => hero.player_selectable && !hero.disabled)
-  // Превращаем каждого героя в объект под интерфейс Hero
   .map((hero) => {
     const stat = statsMap[hero.id];
     const matches = stat?.matches || 0;

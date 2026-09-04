@@ -5,11 +5,15 @@ export interface HeroAsset {
   name: string;
   player_selectable: boolean;
   disabled?: boolean;
+  hideout_rich_presence?: string;
+  tags?: string[];
+  description?: {
+    lore?: string;
+  };
   images?: {
     icon_hero_card_webp?: string;
   };
 }
-
 export async function getHeroesAssets(): Promise<HeroAsset[]> {
   const response = await fetchWithRetry(
     'https://api.deadlock-api.com/v1/assets/heroes',

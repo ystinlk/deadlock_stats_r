@@ -10,5 +10,6 @@ export function NavBar() {
         <Link className='flex gap-1 hover:bg-neutral-600/50 rounded-md hover:text-white px-2 py-1.5 text-base  text-neutral-400 font-medium' href="/"><Package/> Match items</Link>
         <Link className='flex gap-1 hover:bg-neutral-600/50 rounded-md hover:text-white px-2 py-1.5 text-base  text-neutral-400 font-medium' href="/"><History/>Match view</Link>
         <Link className='flex gap-1 hover:bg-neutral-600/50 rounded-md hover:text-white px-2 py-1.5 text-base  text-neutral-400 font-medium' href="/"><Search/>Profile search</Link>
+
     </header>
 )}
