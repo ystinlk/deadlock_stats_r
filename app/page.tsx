@@ -1,4 +1,4 @@
-import { getHeroesAssets } from "@/service/gertHeroesAssets";
+import { getHeroesAssets } from "@/service/getHeroesAssets";
 import { getHeroStats } from "@/service/getHeroStats";
 
 import { HeroTable } from "./components/HeroesTable";

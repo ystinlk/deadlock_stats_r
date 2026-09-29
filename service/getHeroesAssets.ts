@@ -13,6 +13,11 @@ export interface HeroAsset {
   images?: {
     icon_hero_card_webp?: string;
   };
+  starting_stats?: {
+    max_health?: { value: number };
+    max_move_speed?: { value: number };
+    stamina?: { value: number };
+  };
 }
 export async function getHeroesAssets(): Promise<HeroAsset[]> {
   const response = await fetchWithRetry(
