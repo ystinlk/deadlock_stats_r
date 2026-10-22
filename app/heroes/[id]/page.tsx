@@ -1,40 +1,44 @@
 import { getHeroesAssets } from "@/service/getHeroesAssets";
-import { getHeroStats } from "@/service/getHeroStats";
+import { getheroMetric } from "@/utils/getheroMetric";
 import { getHeroCounters } from "@/service/getHeroCounters";
 import { getHeroSynergies } from "@/service/getHeroSynergies";
+import Link from 'next/link'
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function HeroPage({ params }: PageProps) {
+
+  // получаем все данные разом 
+  const [HeroAssets, heroesMetric, countersData, synergiesData] = await Promise.all([
+      getHeroesAssets(),
+      getheroMetric(), 
+      getHeroCounters(),
+      getHeroSynergies()
+    ]) 
+  // Айди героя на которого нажали чтобы попасть на эту страницу
   const { id } = await params;
 
   // 1. Базовые данные и общая статистика
-  const HeroAssets = await getHeroesAssets();
   const hero = HeroAssets.find((hero) => hero.id === Number(id));
-  const heroesStats = await getHeroStats();
-
-  const totalGames = heroesStats.reduce((sum, s) => sum + s.matches, 0) / 12;
-  const oneHeroStats = heroesStats.find((s) => s?.hero_id === Number(id));
-  const pickRate = oneHeroStats && totalGames > 0 ? ((oneHeroStats.matches / totalGames) * 100).toFixed(1) : "0.0";
-  const rawHeroWr = oneHeroStats && oneHeroStats.matches > 0 ? (oneHeroStats.wins / oneHeroStats.matches) * 100 : 50;
-  const winrate = rawHeroWr.toFixed(1);
+  const oneHeroStats = heroesMetric.find((s) => s?.id === Number(id));
+  const pickRate = oneHeroStats?.pickrate;
+  const winrate = oneHeroStats?.winrate ?? 50;
 
   // Карта общих винрейтов всех героев для вычисления ожидаемого исхода (Expected WR)
   const heroWinrates = new Map<number, number>(
-    heroesStats.map((s) => [s.hero_id, s.matches > 0 ? (s.wins / s.matches) * 100 : 50])
+    heroesMetric.map((s) => [s.id, s.winrate])
   );
 
   // 2. Худшие матчапы (Контр-пики) с поправкой на Advantage
-  const countersData = await getHeroCounters();
   const bestCounterPicks = countersData
     .filter((d) => d.hero_id === Number(id) && d.matches_played > 100)
     .map((item) => {
       const matchWr = (item.wins / item.matches_played) * 100;
       const enemyWr = heroWinrates.get(item.enemy_hero_id) ?? 50;
       // Ожидаемый процент побед против этого оппонента
-      const expectedWr = rawHeroWr - (enemyWr - 50);
+      const expectedWr = winrate - (enemyWr - 50);
       // Чем ниже Advantage, тем сильнее оппонент ломает игру нашему герою
       const advantage = matchWr - expectedWr;
 
@@ -48,7 +52,6 @@ export default async function HeroPage({ params }: PageProps) {
     .slice(0, 5);
 
   // 3. Лучшие напарники (Синергия) с поправкой на Advantage
-  const synergiesData = await getHeroSynergies();
   const bestSynergiesPicks = synergiesData
     .filter((d) => (d.hero_id1 === Number(id) || d.hero_id2 === Number(id)) && d.matches_played > 100)
     .map((item) => {
@@ -56,7 +59,7 @@ export default async function HeroPage({ params }: PageProps) {
       const matchWr = (item.wins / item.matches_played) * 100;
       const allyWr = heroWinrates.get(allyId) ?? 50;
       // Ожидаемый процент побед в паре с этим напарником
-      const expectedWr = rawHeroWr + allyWr - 50;
+      const expectedWr = winrate + allyWr - 50;
       // Чем выше Synergy, тем продуктивнее напарники играют вместе относительно своей нормы
       const synergyAdvantage = matchWr - expectedWr;
 
@@ -158,7 +161,7 @@ export default async function HeroPage({ params }: PageProps) {
                         className="w-8 h-8 rounded-full object-cover border border-neutral-700 bg-neutral-800"
                       />
                       <span className="text-sm font-medium text-neutral-200">
-                        {enemy?.name ?? "Неизвестный"}
+                        <Link href={`/heroes/${enemy?.id}`}>{enemy?.name ?? "Неизвестный"}</Link>
                       </span>
                     </div>
                     <div className="text-right">
@@ -195,7 +198,7 @@ export default async function HeroPage({ params }: PageProps) {
                         className="w-8 h-8 rounded-full object-cover border border-neutral-700 bg-neutral-800"
                       />
                       <span className="text-sm font-medium text-neutral-200">
-                        {ally?.name ?? "Неизвестный"}
+                        <Link href={`/heroes/${ally?.id}`}>{ally?.name ?? "Неизвестный"}</Link>
                       </span>
                     </div>
                     <div className="text-right">
